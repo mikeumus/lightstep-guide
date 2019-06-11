@@ -71,16 +71,82 @@ View all spans that make up a trace. Clicking spans in LightStep's Explorer page
 # Explorer
 ## Features
 ### Querying
-* #### Snapshots
-* #### Latency histogram
-* #### Create a stream
+Use the query bar at the top of Explorer to do queries on a combination of service, operation and multiple tags. Before doing any additional analysis, it is recommended to query for at least a service to start with. When you submit a query, the span table will populate with spans corresponding to traces that match your query. Clicking an individual span in the span table will take you to the trace page. You may see a "trace assembling" message on the trace page, this means LightStep is polling your Satellites to add additional spans that may be coming in. LightStep polls your Satellites for about 2 minutes for every trace assembly.
+
+###### Running a query
+![run a query](https://github.com/sbaum1994/lightstep-guide/raw/master/images/run_query.gif)
+
+#### Snapshots
+Every time you run a query in Explorer a Snapshot is created automatically, triggering 3000 traces (or less depending on the throughput of the service and the size of the Satellite buffer) that are then assembled and **persisted** and attached to this **Snapshot URL**. This URL can be shared or linked to as needed within your org, and will retain all functionality. (i.e. you can filter, group by, view service diagram etc. in each persisted Snapshot)
+
+###### Viewing your snapshots
+![view a snapshot](https://github.com/sbaum1994/lightstep-guide/blob/master/images/view_snapshot.gif)
+
+#### Latency histogram
+The latency histogram below the query bar in the Explorer displays on a logarithmic scale x scale, the duration of the spans queried, along with the amount on the y axis. It's useful for filtering the span table to a particular latency percentile, or viewing past performance of the same query (by clicking the 1 day, 1 hour, 1 week buttons).
+
+###### Filtering to only p95+ spans with the latency histogram
+![filter latency histogram](https://github.com/sbaum1994/lightstep-guide/blob/master/images/filter_histogram.gif)
+
+#### Create a stream
+When you run a query, a Stream, or historical timeseries data, may already exist for the query. If it does exist, "View Stream" will appear on the upper right of the Explorer page. If there is no Stream yet for this query, "Create Stream" will appear on the upper right instead. Click "Create Stream" to begin collecting historical data for any query of any cardinality. 
+
+###### Creating a stream
+![create a stream](https://github.com/sbaum1994/lightstep-guide/blob/master/images/create_stream.gif)
+
 ### Trace analysis
-* #### Show all spans in traces
-* #### Filter
-* #### Group by
+The trace analysis section of Explorer allows you to perform further actions on the spans in the spans table that were returned by your query.
+
+#### Show all spans in traces
+Clicking show all spans in traces will populate the table with all spans making up a trace for each trace in this Snapshot. For example, if I had a trace with spans starting in my `webapp` service and ending in my `api-server` service, and queried for `api-server` in the query bar, when I click "Show all spans in traces" the span table will populate with upstream spans emitted from my `webapp` service in addition to the spans from my `api-server` service.
+
+###### Showing all spans in traces
+![show all spans](https://github.com/sbaum1994/lightstep-guide/blob/master/images/show_all_spans.gif)
+
+#### Filter
+Filtering by a tag, operation or service will filter all spans in the table correspondingly. For example, if I had queried for a service, `api-server`, emitting spans with the tag `type` corresponding to http methods, I could filter by `type: POST` to see only the `POST` method spans. It's possible to add multiple filters.
+
+###### Filtering by `type: POST`
+![filter span table by a tag](https://github.com/sbaum1994/lightstep-guide/blob/master/images/filter_spans_table_by_tag.gif)
+
+#### Group by
+Group by allows you to see roll up analysis of spans in the span table. It's possible to group by operation, service or any tag. For example, assuming I had just filtered my spans table by the `type: POST` tag I can group by `operation` to see the latency, error rate and span count of all operations serving the http method `POST` in my `api-server`.
+
+###### Grouping by `operation`
+![group by operation](https://github.com/sbaum1994/lightstep-guide/blob/master/images/group_spans_table_by_operation.gif)
+
 ### Service diagram
+Clicking the service diagram tab in Explorer will dynamically generate a service diagram based on all traces that were assembled for this query (or Snapshot). The yellow rings around services represent latency contribution and the red rings represent services with errors reporting (spans with the `error: true` tag). Latency contributions are calculated corresponding to the `service` that was queried, if no service was queried then the latency contribution rings _will not_ appear. Filtering the latency histogram will re-render the service diagram using only the selected spans (and corresponding selected traces). 
+
+###### Filtering the latency histogram to view latency contributions in the service diagram for long-running spans
+![service diagram latency histogram](https://github.com/sbaum1994/lightstep-guide/blob/master/images/service_diagram_filter_histogram.png) 
+
+Clicking a service in the service diagram will populate example spans on the left for each service operation, in order of operation throughput and span duration. Clicking on a service that has a red ring will prioritize showing spans with _errors_. Selecting a span from the service diagram will take you to the trace page, with the corresponding span highlighted.
+
+###### Selecting a span with an error from the service diagram
+![service diagram span with error](https://github.com/sbaum1994/lightstep-guide/blob/master/images/service_diagram_to_trace_page.gif)
+
 ### Correlations
-## Logical Flow
+Latency correlations appear in the right panel of the spans table. A positive number indicates a correlation inside the selected window of the latency histogram, while a negative number indicates a correlation outside the selected window. Hovering a correlation computation will highlight the raw span counts in the latency histogram as well. Correlations are run based only off the query bar on the top and the latency histogram selection, and _do not re-compute based on any trace analysis selections_. Correlations will run over combinations of service, tag and operation for all traces corresponding to the query.
+
+###### Selecting long running spans from the latency histogram and viewing corresponding correlations
+![view correlations](https://github.com/sbaum1994/lightstep-guide/blob/master/images/correlations_hover.gif)
+
+## Logical flow
+In Explorer, unless you are searching for something specifically high cardinality, such as a single trace based on a `request-id` tag for example, you usually want to:
+* Start with querying a __service__ or __service and operation__ combination
+
+Then you could: 
+* Use __group by__ to see what tags are reporting for the spans that were returned based on your query and their performance across values
+* Click into __service diagram__ to understand the transaction flow between services
+* Click __show all spans in traces__ and then __group by `operation`__ to see the performance break down across all operations upstream and downstream of this queried __service__ or __service and operation__ combination
+* Click individual traces to view corresponding log information, relevant external links, and span context in the trace page
+
+Once you've solved a problem or found relevant clues you could:
+* Link the Snapshot URL corresponding to your Explorer query to your colleagues or in a post-mortem
+* Link to a selected span in the trace page with suspect logs or performance
+* Create a stream to start collecting performance metrics and historical traces for a query
+
 ## Filter in latency histogram for long running spans (p95+) and view correlations and service diagram
 ## Group by error type to see error frequencies and latency percentiles for a single service
 ## Filter in latency histogram for long running spans and group by region to root cause a regional problem
