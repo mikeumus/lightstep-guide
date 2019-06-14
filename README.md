@@ -147,9 +147,34 @@ Once you've solved a problem or found relevant clues you could:
 * Link to a selected span in the trace page with suspect logs or performance
 * Create a stream to start collecting performance metrics and historical traces for a query
 
-## Filter in latency histogram for long running spans (p95+) and view correlations and service diagram
 ## Group by error type to see error frequencies and latency percentiles for a single service
-## Filter in latency histogram for long running spans and group by region to root cause a regional problem
+Scenario: I'd like to investigate the downstream health of all services my `api-server` service depends on.
+
+1. First I query the service `api-server` and visit the **service diagram** to view downstream service health.
+
+2. I see that the `auth-service` is red, showing that there are errors reporting dowstream from my `api-server` service.
+
+3. I switch back to the Trace Analysis tab and click **show all spans in traces** to view all the spans flowing through the `api-server` service. Then I filter by `service:auth-service` and `error:true`. Now I am looking at all spans downstream of `api-server` that originate in the `auth-service` with the `error:true` tag.
+
+4. I **add a column** for `exception.type` to populate this tag in my trace table without having to click on each trace individually. I see this tag is populating for all my spans and might be a good candidate for **group by**.
+
+5. I group by `exception.type` and see the breakdown of latency averages and frequency (span count) by the `exception.type` tag. In this case, `TimeoutException` seems to be much more frequent than `RuntimeException`.
+
+## Filter in latency histogram use group by to find long running operations
+WIP
+Group by operation
+Sort by latency
+Click show all spans in traces
+Group by operation
+Sort by latency
+Click into a span
+Verify that this operation is actually the outlier that is causing long running transactions.
+(! transactions that include user-space-mapping operation) 
+
+## Filter in latency histogram to find the and group by region to root cause a regional problem
+Scenario: An alert comes in about my `api-server` service experiences high latencies. 
+
+
 ## Group by http status code to see frequencies and latency percentiles per status code for an operation
 ## Show all spans in trace and filter in trace analyzer to view upstream service performance for an operation
 
