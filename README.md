@@ -154,9 +154,7 @@ Scenario: I'd like to investigate the downstream health of all services my `api-
 
 2. I see that the `auth-service` is red, showing that there are errors reporting dowstream from my `api-server` service.
 
-
-###### View service diagram and select `auth-service` to see error spans.
-<details><summary>Show gif</summary>
+<details><summary></summary>
 <p>
  
 ![view service diagram](https://github.com/sbaum1994/lightstep-guide/blob/master/images/2select_service_diagram.gif)
@@ -166,8 +164,7 @@ Scenario: I'd like to investigate the downstream health of all services my `api-
 
 3. I switch back to the Trace Analysis tab and click **show all spans in traces** to view all the spans flowing through the `api-server` service. Then I filter by `service:auth-service` and `error:true`. Now I am looking at all spans downstream of `api-server` that originate in the `auth-service` with the `error:true` tag.
 
-###### Show all spans and filter.
-<details><summary>Show gif</summary>
+<details><summary></summary>
 <p>
  
 ![show all spans and filter](https://github.com/sbaum1994/lightstep-guide/blob/master/images/3show_all_spans_and_filter.gif)
@@ -177,8 +174,7 @@ Scenario: I'd like to investigate the downstream health of all services my `api-
 
 4. I **add a column** for `exception.type` to populate this tag in my trace table without having to click on each trace individually. I see this tag is populating for all my spans and might be a good candidate for **group by**.
 
-###### Add column to view `exception.type` tag
-<details><summary>Show gif</summary>
+<details><summary></summary>
 <p>
  
 ![add a column to view exception type tag](https://github.com/sbaum1994/lightstep-guide/blob/master/images/4add_column_exception_type.gif)
@@ -188,8 +184,7 @@ Scenario: I'd like to investigate the downstream health of all services my `api-
 
 5. I group by `exception.type` and see the breakdown of latency averages and frequency (span count) by the `exception.type` tag. In this case, `TimeoutException` seems to be much more frequent than `RuntimeException` and therefore causing the higher magnitude of errors.
 
-###### Group by `exception.type` tag
-<details><summary>Show gif</summary>
+<details><summary></summary>
 <p>
 
 ![group by exception type](https://github.com/sbaum1994/lightstep-guide/blob/master/images/5group_by_exception_type.gif)
