@@ -203,12 +203,43 @@ Click into a span
 Verify that this operation is actually the outlier that is causing long running transactions.
 (! transactions that include user-space-mapping operation) 
 
-## Filter in latency histogram to find the and group by region to root cause a regional problem
-Scenario: An alert comes in about my `api-server` service experiences high latencies. 
+## Filter in latency histogram to get p99's and group by region to root cause a regional problem only affecting a few tenants/requests
+Scenario: An alert or complaint comes in for a particular service or transaction experiencing intermittent high latencies. (This could be configured through a stream for this particular service or transaction path by setting the alert condition to `p99 > Xms`) 
 
+1. First I query the relevant service, for example `api-server`, and filter the latency histogram to longer running spans.
+
+2. I **group by** the corresponding region tag, in this example `region` in the Trace Analysis table to see which 
+
+<details><summary></summary>
+<p>
+
+![group by region](https://github.com/sbaum1994/lightstep-guide/blob/master/images/group_by_region.gif)
+
+</p>
+</details>
 
 ## Group by http status code to see frequencies and latency percentiles per status code for an operation
-## Show all spans in trace and filter in trace analyzer to view upstream service performance for an operation
+1. I query the relevant service, and (in this example) operation, then **group by** the `http.status_code` tag. I could do this globally or scoped to a particular arbitrary tag (ex. `tenant-id`, or `region`) to view across a section of data.
+
+<details><summary></summary>
+<p>
+ 
+![group by status code](https://github.com/sbaum1994/lightstep-guide/blob/master/images/group_by_http_status_code.gif)
+
+</p>
+</details>
+## Show all spans in trace and filter in trace analyzer to view downstream service performance by ingress operation
+1. I query the relevant service (in this case `ios-client`) and view the **service diagram** to see which downstream services have high latency contributions. I notice that `api-server` has significant latency contribution.
+
+2. I switch to the Trace Analysis table and click **show all spans**, **filter** by `service: api-server` and by `ingress.operation: true` to filter out some of the span data noise. My `api-server` might have all kinds of operations but I just want to see high-level ones. This requires you to have ingress.operation as a tag, good best practice. Then I **group by** operation and see the performance (error rate and average latencies) of the operations within `api-server` that is downstream to `ios-client`.
+
+<details><summary></summary>
+<p>
+ 
+![show all and group by](https://github.com/sbaum1994/lightstep-guide/blob/master/images/check_upstream_service_operation_performance.gif)
+
+</p>
+</details>
 
 # Streams
 ## Define a stream to monitor performance over time for a tag
