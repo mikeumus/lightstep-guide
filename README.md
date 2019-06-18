@@ -29,24 +29,23 @@ Service directory is LightStep's landing page. It's primary purpose is to allow 
     * View existing streams and dashboards by service
 ### Explorer
 Explorer is LightStep's query page. This is where you can query your Satellites for live span and trace data, and view traces and performance in real time. You can view a live service diagram with performance overlayed, and do various analyses on your span data. _**There is no cardinality limits or additional cost when querying in Explorer.**_
-  * Features
-    * Querying
-      * Snapshots
-      * Latency histogram
-      * Create a stream
-    * Trace analysis
-      * Show all spans in traces
-      * Filter
-      * Group by
-    * Service diagram
-    * Correlations
-  * Logical flow
+  * [Features](#features)
+    * [Querying](#querying)
+      * [Snapshots](#snapshots)
+      * [Latency histogram](#latency-histogram)
+      * [Create a stream](#create-a-stream)
+    * [Trace analysis](#trace-analysis)
+      * [Show all spans in traces](#show-all-spans-in-traces)
+      * [Filter](#filter)
+      * [Group by](#group-by)
+    * [Service diagram](#service-diagram)
+    * [Correlations](#correlations)
+  * [Logical flow](#logical-flow)
   * __Guides__
-    * Filter in latency histogram for long running spans (p95+) and view correlations and service diagram
-    * Group by error type to see error frequencies and latency percentiles for a single service
-    * Filter in latency histogram for long running spans and group by region to root cause a regional problem
-    * Group by http status code to see frequencies and latency percentiles per status code for an operation
-    * Show all spans in trace and filter in trace analyzer to view upstream service performance for an operation
+    * [Group by error type to see error frequencies and latency percentiles for a single service](#group-by-error-type-to-see-error-frequencies-and-latency-percentiles-for-a-single-service)
+    * [Filter in latency histogram to get p99's and group by region to root cause a regional problem only affecting a few tenants/requests](#filter-in-latency-histogram-to-get-p99s-and-group-by-region-to-root-cause-a-regional-problem-only-affecting-a-few-tenantsrequests)
+    * [Group by http status code to see frequencies and latency percentiles per status code for an operation](#group-by-http-status-code-to-see-frequencies-and-latency-percentiles-per-status-code-for-an-operation)
+    * [Show all spans in trace and filter in trace analyzer to view upstream service performance for an operation](#show-all-spans-in-trace-and-filter-in-trace-analyzer-to-view-downstream-service-performance-by-ingress-operation)
 ### Streams
 Streams are where you can record __timeseries data__ in LightStep of your span performance. Any query in Explorer of any cardinality can also be converted to a stream to enable recording of historical data. Streams record latency percentiles, throughput, error rate and traces over time for any query.
   * __Guides__
