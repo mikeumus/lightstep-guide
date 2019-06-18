@@ -232,6 +232,14 @@ Scenario: An alert or complaint comes in for a particular service or transaction
 ## Show all spans in trace and filter in trace analyzer to view downstream service performance by ingress operation
 1. I query the relevant service (in this case `ios-client`) and view the **service diagram** to see which downstream services have high latency contributions. I notice that `api-server` has significant latency contribution.
 
+<details><summary></summary>
+<p>
+ 
+![show all and group by](https://github.com/sbaum1994/lightstep-guide/blob/master/images/service_diagram_ios-client.png)
+
+</p>
+</details>
+
 2. I switch to the Trace Analysis table and click **show all spans**, **filter** by `service: api-server` and by `ingress.operation: true` to filter out some of the span data noise. My `api-server` might have all kinds of operations but I just want to see high-level ones. This requires you to have ingress.operation as a tag, good best practice. Then I **group by** operation and see the performance (error rate and average latencies) of the operations within `api-server` that is downstream to `ios-client`.
 
 <details><summary></summary>
