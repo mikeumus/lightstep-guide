@@ -228,6 +228,7 @@ Scenario: An alert or complaint comes in for a particular service or transaction
 
 </p>
 </details>
+
 ## Show all spans in trace and filter in trace analyzer to view downstream service performance by ingress operation
 1. I query the relevant service (in this case `ios-client`) and view the **service diagram** to see which downstream services have high latency contributions. I notice that `api-server` has significant latency contribution.
 
