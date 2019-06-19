@@ -146,7 +146,7 @@ Once you've solved a problem or found relevant clues you could:
 * Link to a selected span in the trace page with suspect logs or performance
 * Create a stream to start collecting performance metrics and historical traces for a query
 
-## Group by error type to see error frequencies and latency percentiles for a single service
+## See error frequencies and latency percentiles for a single service
 Scenario: I'd like to investigate the downstream health of all services my `api-server` service depends on.
 
 1. First I query the service `api-server` and visit the **service diagram** to view downstream service health.
@@ -202,7 +202,7 @@ Click into a span
 Verify that this operation is actually the outlier that is causing long running transactions.
 (! transactions that include user-space-mapping operation) 
 
-## Filter in latency histogram to get p99's and group by region to root cause a regional problem only affecting a few tenants/requests
+## Root cause a regional problem only affecting a few tenants/requests (p99+)
 Scenario: An alert or complaint comes in for a particular service or transaction experiencing intermittent high latencies. (This could be configured through a stream for this particular service or transaction path by setting the alert condition to `p99 > Xms`) 
 
 1. First I query the relevant service, for example `api-server`, and filter the latency histogram to longer running spans.
@@ -217,7 +217,7 @@ Scenario: An alert or complaint comes in for a particular service or transaction
 </p>
 </details>
 
-## Group by http status code to see frequencies and latency percentiles per status code for an operation
+## See frequencies and latency percentiles per status code for an operation
 1. I query the relevant service, and (in this example) operation, then **group by** the `http.status_code` tag. I could do this globally or scoped to a particular arbitrary tag (ex. `tenant-id`, or `region`) to view across a section of data.
 
 <details><summary></summary>
@@ -228,7 +228,7 @@ Scenario: An alert or complaint comes in for a particular service or transaction
 </p>
 </details>
 
-## Show all spans in trace and filter in trace analyzer to view downstream service performance by ingress operation
+## View downstream service performance for a single ingress operation of a service
 1. I query the relevant service (in this case `ios-client`) and view the **service diagram** to see which downstream services have high latency contributions. I notice that `api-server` has significant latency contribution.
 
 <details><summary></summary>
