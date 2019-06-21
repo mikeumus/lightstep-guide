@@ -29,24 +29,23 @@ Service directory is LightStep's landing page. It's primary purpose is to allow 
     * View existing streams and dashboards by service
 ### Explorer
 Explorer is LightStep's query page. This is where you can query your Satellites for live span and trace data, and view traces and performance in real time. You can view a live service diagram with performance overlayed, and do various analyses on your span data. _**There is no cardinality limits or additional cost when querying in Explorer.**_
-  * Features
-    * Querying
-      * Snapshots
-      * Latency histogram
-      * Create a stream
-    * Trace analysis
-      * Show all spans in traces
-      * Filter
-      * Group by
-    * Service diagram
-    * Correlations
-  * Logical flow
+  * [Features](#features)
+    * [Querying](#querying)
+      * [Snapshots](#snapshots)
+      * [Latency histogram](#latency-histogram)
+      * [Create a stream](#create-a-stream)
+    * [Trace analysis](#trace-analysis)
+      * [Show all spans in traces](#show-all-spans-in-traces)
+      * [Filter](#filter)
+      * [Group by](#group-by)
+    * [Service diagram](#service-diagram)
+    * [Correlations](#correlations)
+  * [Logical flow](#logical-flow)
   * __Guides__
-    * Filter in latency histogram for long running spans (p95+) and view correlations and service diagram
-    * Group by error type to see error frequencies and latency percentiles for a single service
-    * Filter in latency histogram for long running spans and group by region to root cause a regional problem
-    * Group by http status code to see frequencies and latency percentiles per status code for an operation
-    * Show all spans in trace and filter in trace analyzer to view upstream service performance for an operation
+    * [Group by error type to see error frequencies and latency percentiles for a single service](#group-by-error-type-to-see-error-frequencies-and-latency-percentiles-for-a-single-service)
+    * [Filter in latency histogram to get p99's and group by region to root cause a regional problem only affecting a few tenants/requests](#filter-in-latency-histogram-to-get-p99s-and-group-by-region-to-root-cause-a-regional-problem-only-affecting-a-few-tenantsrequests)
+    * [Group by http status code to see frequencies and latency percentiles per status code for an operation](#group-by-http-status-code-to-see-frequencies-and-latency-percentiles-per-status-code-for-an-operation)
+    * [Show all spans in trace and filter in trace analyzer to view upstream service performance for an operation](#show-all-spans-in-trace-and-filter-in-trace-analyzer-to-view-downstream-service-performance-by-ingress-operation)
 ### Streams
 Streams are where you can record __timeseries data__ in LightStep of your span performance. Any query in Explorer of any cardinality can also be converted to a stream to enable recording of historical data. Streams record latency percentiles, throughput, error rate and traces over time for any query.
   * __Guides__
@@ -147,7 +146,7 @@ Once you've solved a problem or found relevant clues you could:
 * Link to a selected span in the trace page with suspect logs or performance
 * Create a stream to start collecting performance metrics and historical traces for a query
 
-## Group by error type to see error frequencies and latency percentiles for a single service
+## See error frequencies and latency percentiles for a single service
 Scenario: I'd like to investigate the downstream health of all services my `api-server` service depends on.
 
 1. First I query the service `api-server` and visit the **service diagram** to view downstream service health.
@@ -203,7 +202,7 @@ Click into a span
 Verify that this operation is actually the outlier that is causing long running transactions.
 (! transactions that include user-space-mapping operation) 
 
-## Filter in latency histogram to get p99's and group by region to root cause a regional problem only affecting a few tenants/requests
+## Root cause a regional problem only affecting a few tenants/requests (p99+)
 Scenario: An alert or complaint comes in for a particular service or transaction experiencing intermittent high latencies. (This could be configured through a stream for this particular service or transaction path by setting the alert condition to `p99 > Xms`) 
 
 1. First I query the relevant service, for example `api-server`, and filter the latency histogram to longer running spans.
@@ -218,7 +217,7 @@ Scenario: An alert or complaint comes in for a particular service or transaction
 </p>
 </details>
 
-## Group by http status code to see frequencies and latency percentiles per status code for an operation
+## See frequencies and latency percentiles per status code for an operation
 1. I query the relevant service, and (in this example) operation, then **group by** the `http.status_code` tag. I could do this globally or scoped to a particular arbitrary tag (ex. `tenant-id`, or `region`) to view across a section of data.
 
 <details><summary></summary>
@@ -229,8 +228,16 @@ Scenario: An alert or complaint comes in for a particular service or transaction
 </p>
 </details>
 
-## Show all spans in trace and filter in trace analyzer to view downstream service performance by ingress operation
+## View downstream service performance for a single ingress operation of a service
 1. I query the relevant service (in this case `ios-client`) and view the **service diagram** to see which downstream services have high latency contributions. I notice that `api-server` has significant latency contribution.
+
+<details><summary></summary>
+<p>
+ 
+![show all and group by](https://github.com/sbaum1994/lightstep-guide/blob/master/images/service_diagram_ios-client.png)
+
+</p>
+</details>
 
 2. I switch to the Trace Analysis table and click **show all spans**, **filter** by `service: api-server` and by `ingress.operation: true` to filter out some of the span data noise. My `api-server` might have all kinds of operations but I just want to see high-level ones. This requires you to have ingress.operation as a tag, good best practice. Then I **group by** operation and see the performance (error rate and average latencies) of the operations within `api-server` that is downstream to `ios-client`.
 
