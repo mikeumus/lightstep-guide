@@ -25,7 +25,7 @@ Visit our full [documentation](http://docs.lightstep.com) or [API documentation]
 * [**Meaningful Traces**](#meaningful-traces)
   * [Abstracting User Interactions](#abstracting-user-interactions)
   * [Important Tags and Logs](#important-tags-and-logs)
-  * [Example Traces](#example-traces)
+  * [Example Instrumentation](#example-instrumentation)
 
 ## Meaningful Traces
 ### Abstracting User Interactions
@@ -56,3 +56,20 @@ Adding things like "parameters", `params.name` `params.count`, that correspond t
 * Stack trace or exception messages, error messages
 * Logging when things are returning, processing, or waiting, ex. context deadline exceeded. An operation may go for a few seconds, logging can add context on what it's doing or what it's waiting for.
 * For any additional context. If a user hit a certain flow and it's non-obvious by the operations, a simple log message can be helpful, i.e. "user entered flow x" (that should also be a tag!)
+
+### Example Instrumentation
+This is an example directly from LightStep tracing it's users, where I'm investigating the performance for our dom_load operation. (LightStep inception!)
+
+The first picture is a service diagram of my *react-client* which is the frontend web client reporting from the browser when a user uses our UI. As you can see there are some backend services it's relying upon.
+
+![service diagram](https://github.com/sbaum1994/lightstep-guide/raw/master/images/blurred_service_diagram_from_fe.png)
+
+If I wanted to dig into our DOM load performance in particular for the higher percentiles (similar to start-up on a mobile app) I can query for that high level operation in Explorer, filter my latency histogram, and then click _show all spans in traces_ and _group-by operation_ (or any other tag). Now what I see is all the operations in order of average latency that are happening in my *react-client* and _downstream_ to it for p95+ latencies.
+
+![groupby](https://github.com/sbaum1994/lightstep-guide/raw/master/images/blurred_show_all_traces_groupby_from_fe.png)
+
+I can then click on an individual trace and see a breakdown of latencies from downstream services contributing to my DOM load time, as well as spans showing latency contributions from the *react-client* such as DOM load transfer time etc. Since I already grouped by operation previously and saw the average times for my p95+ latencies, I know which operations in this trace are an average example of latency contribution, and I can also see more in depth the latency breakdown between services of all things that are triggered by the DOM load action and order of events.
+
+![domload trace](https://github.com/sbaum1994/lightstep-guide/raw/master/images/domload_trace_blurred.png)
+
+If I wanted to monitor DOM load historically I could create streams for it. I could also have done this even further by adding a particular tag for an application version for example or region etc. Service directory will also populate with all the operations for each service, and will keep track of operation latency and error changes per service. So I can click over to service directory and see if there's been a jump in p50, p90, p95, p99 latencies or error rate or throughput historically compared to now.
