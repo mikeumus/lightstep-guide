@@ -17,15 +17,98 @@ Visit our full [documentation](http://docs.lightstep.com) or [API documentation]
   * [Implementating the Tracer](#implementing-the-tracer)
     * [Instantiation](#instantiation)
     * [Reporting Loop](#reporting-loop)
-    * [Tracer Overhead](#tracer-overhead)
-  * [Gen2 Mobile Libs (self-defined transport)](#gen2-mobile-libs)
+  * [Code-snippets](#code-snippets)
 * [Emitting Data](#emitting-data)
-  * [Practical Advice](#practical-advice)
-  * [Public Satellites](#public-satellites)
 * [**Meaningful Traces**](#meaningful-traces)
   * [Abstracting User Interactions](#abstracting-user-interactions)
   * [Important Tags and Logs](#important-tags-and-logs)
   * [Example Instrumentation](#example-instrumentation)
+
+## Client-Side Tracers
+### Libraries
+#### C++ Library
+LightStep's C++ library is heavily optimized when using the http streaming transport option. This is recommended.
+
+* [Standard LightStep C++ Library](https://github.com/lightstep/lightstep-tracer-cpp) 
+
+#### iOS Libraries
+LightStep supports two iOS libraries. One is a standard tracer library in Objective C. The other is a Swift library we developed concurrently with Lyft that requires a custom defined transport. This was done to allow for more flexibility and optimization on the analytics data payloads (Lyft was using a specialized transport for all analytics data). [Mobile Envoy](https://eng.lyft.com/announcing-envoy-mobile-5c2067d9ade0) was made to work with this library.
+
+* [Standard LightStep Objective-C Library](https://github.com/lightstep/lightstep-tracer-objc)
+* [Self-defined Transport LightStep Swift Library](https://github.com/lightstep/lightstep-tracer-swift), send a request to your LightStep rep for access to this library as it's non-public
+
+#### Android Libraries
+LightStep supports two android libraries. One is a standard tracer library with built in Okhttp and GRPC transports. The other is a library we developed concurrently with Lyft that requires a custom defined transport. This was done to allow for more flexibility and optimization on the analytics data payloads (Lyft was using a specialized transport for all analytics data). [Mobile Envoy](https://eng.lyft.com/announcing-envoy-mobile-5c2067d9ade0) was made to work with this library.
+
+* [Standard LightStep Android Library](https://github.com/lightstep/lightstep-tracer-android)
+* [Self-defined Transport LightStep Android3 Library](https://github.com/lightstep/lightstep-tracer-android3), send a request to your LightStep rep for access to this library as it's non-public
+
+#### Javascript Library
+LightStep has a single Javascript library that supports both backend and frontend Javascript applications. It also comes with auto-instrumentation on fetch and xhr. Make sure you include the platform e.g. `lightstep-tracer/browser` in your require statements. See the repository for usage options and examples. 
+
+* [Standard LightStep Javascript Library](https://github.com/lightstep/lightstep-tracer-javascript) 
+
+#### Code-snippets and common patterns
+WIP
+See respective repositories linked above for examples on basics (like starting a tracer and sending spans).
+
+* For code examples of user-specific abstractions, jump to this [section](#abstracting-user-interactions)
+* [See examples of common patterns in Java here](https://github.com/opentracing/opentracing-java/tree/master/opentracing-testbed)
+
+### Implementing the Tracer
+#### Instantiation
+The LightStep tracer is meant to be a singleton. It should be instantiated at the very beginning of your application. Dependency injection of the tracer is definitely nice to have, for easy access across classes and for ensuring a singleton instance. If you are already using DI for logging or http transport etc. consider following the same patterns
+
+Registering the tracer with DI in Android:
+```@Module
+public class TracerModule {
+
+ @Provides @Singleton
+ protected io.opentracing.Tracer provideTracer() {
+   if (!GlobalTracer.isRegistered()) {
+     io.opentracing.Tracer tracer;
+
+...
+```
+
+Always try-catch the instantiation of the tracer, and fallback to the NoopTracer on failures. The tracer options ideally would come from a configuration file. It's a good idea to set high-level tags that will be on all spans at the tracer insantiation level. 
+
+Example of try-catch instantiation in Android:
+```
+try {
+   Options options = new Options.OptionsBuilder() ...
+   tracer = new JRETracer(options);
+   Log.e("TracerInit", "Initialized OpenTracing Tracer with LightStep impl.");
+ } catch (Exception ex) {
+   Log.e("TracerMisconfig", "Invalid Lightstep configuration.  Returning a NoopTracer: {}\", ex.getClass()");
+   if (!isNullOrEmpty(ex.getMessage())) {
+     Log.e("TracerMisconfigEx", ex.getMessage());
+   }
+   tracer = NoopTracerFactory.create();
+ }
+ GlobalTracer.register(tracer);
+ ```
+
+#### Reporting Loop
+LightStep's tracers have a reporting loop that reports to Satellites every x milliseconds, or every x bytes within the buffer, depending on the language (see the tracer libraries for more details on this). 
+
+On traces that have a flush function, considering calling tracer.flush if the tracer is not to be kept alive in the background. For example, flush explictly when the application closes, or when the user temporarily switches to a different application.
+
+In Android it will look like this:
+```
+  // Take advantage of LightStep specific force flush functionality
+  public void castAndFlush(io.opentracing.Tracer tracer, long timeoutMillis) {
+    ((JRETracer)tracer).flush(timeoutMillis);
+  }
+
+```
+
+## Emitting Data
+There are two ways to emit event data from your frontend applications to LightStep.
+1. Report directly to a publically hosted satellite pool, either LightStep SaaS Satellites or your hosted public satellites.
+2. Report indirectly via an analytics bundle that is sent to the backend.
+
+The practical advise is to use whatever pathway you currently use for other metrics and eventing data. The most popular approach among our customer base is to use a public satellite pool. As long as your public satellites are rate limited, this should not be a problem. 
 
 ## Meaningful Traces
 ### Abstracting User Interactions
