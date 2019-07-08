@@ -23,10 +23,10 @@ If you do not know what __Satellites__ are, read this [paragraph](https://docs.l
 ### Service Directory
 Service directory is LightStep's landing page. It's primary purpose is to allow you to see reporting services, operations and their high level performance. A reporting service is a service that is sending span data (which make up traces) to LightStep Satellites. You can also quickly see what is instrumented and what is not instrumented in your codebase. 
   * __Guides__
-    * Search for a reporting service by platform
-    * View ingress and egress operations
-    * Create a stream for an operation
-    * View existing streams and dashboards by service
+    * [Search for a reporting service by platform](#search-for-a-reporting-service-by-platform)
+    * [View ingress and egress operations](#view-ingress-and-egress-operations)
+    * [Create a stream for an operation](#create-a-stream-for-an-operation)
+    * [View existing streams and dashboards by service](#view-existing-streams-and-dashboards-by-service)
 ### Explorer
 Explorer is LightStep's query page. This is where you can query your Satellites for live span and trace data, and view traces and performance in real time. You can view a live service diagram with performance overlayed, and do various analyses on your span data. _**There is no cardinality limits or additional cost when querying in Explorer.**_
   * [Features](#features)
@@ -48,19 +48,20 @@ Explorer is LightStep's query page. This is where you can query your Satellites 
     * [See frequencies and latency percentiles per status code for an operation](#see-frequencies-and-latency-percentiles-per-status-code-for-an-operation)
     * [View downstream service performance for a single ingress operation of a service](#view-downstream-service-performance-for-a-single-ingress-operation-of-a-service)
 ### Streams
-Streams are where you can record __timeseries data__ in LightStep of your span performance. Any query in Explorer of any cardinality can also be converted to a stream to enable recording of historical data. Streams record latency percentiles, throughput, error rate and traces over time for any query.
+Streams are where you can record __timeseries data__ in LightStep of your span performance. Any query in Explorer of any cardinality can also be converted to a stream to enable recording of historical data. Streams record latency percentiles, throughput, error rate and traces over time for any query. See the Google SRE book ![golden signals](https://landing.google.com/sre/sre-book/chapters/monitoring-distributed-systems/#xref_monitoring_golden-signals) for the philosophy behind the metrics being captured.
   * __Guides__
-    * Define a stream to monitor performance over time for a tag
-    * Define a dashboard to monitor performance across a service
-    * Define a dashboard to monitor performance across an end to end transaction (multiple services)
-    * View an individual stream
-    * Define an SLA (Create a condition and an alerting rule for a stream)
+    * [View an individual stream](#view-an-individual-stream)
+    * [Monitor performance over time for a tag](#monitor-performance-over-time-for-a-tag)
+    * [Monitor performance across a service using a dashboard](#monitor-performance-across-a-service-using-dashboard)
+    * [Monitor performance across an end to end transaction using a dashboard](#monitor-performance-across-an-end-to-end-transaction-using-a-dashboard) (multiple services)
+    * [Define an SLA](#define-an-SLA) (Create a condition and an alerting rule for a stream)
 ### Trace page
-View all spans that make up a trace. Clicking spans in LightStep's Explorer page, or clicking on a trace in a Stream, will take you to this page. 
+View all spans that make up a trace. Clicking spans in LightStep's Explorer page, or clicking on a trace in a Stream, will take you to this page.
   * __Guides__
-    * Filter for a particular operation
-    * View a tag, service or operation from a span in Explorer
-    * Define an external link for a tag key value pair, operation or service
+    * [View an individual trace](#view-an-individual-trace)
+    * [Filter for a particular operation](#filter-for-a-particular-operation)
+    * [View a tag, service or operation from a span in Explorer](#view-a-tag-service-or-operation-from-a-span-in-explorer)
+    * [Define an external link for a tag key value pair, operation or service](#define-an-external-link-for-a-tag-key-value-pair-operation-or-service)
 
 # Service Directory
 ## Search for a reporting service by platform
@@ -310,13 +311,179 @@ An alert or complaint comes in for a particular service or transaction experienc
 </details>
 
 # Streams
-## Define a stream to monitor performance over time for a tag
-## Define a dashboard to monitor performance across a service
-## Define a dashboard to monitor performance across an end to end transaction (multiple services)
 ## View an individual stream
+#### Steps
+1. Find the Stream [via Service Directory](#view-existing-streams-and-dashboards-by-service) or via Streams page directly -
+
+![streams page](https://github.com/sbaum1994/lightstep-guide/blob/master/images/streams-page-tab.png)
+
+2. View and interpret the stream
+
+Example Stream:
+
+![example stream](https://github.com/sbaum1994/lightstep-guide/blob/master/images/stream-page.png)
+
+###### What data is a stream capturing?
+A stream in LightStep is capturing all span data flowing from your system into LightStep satellites that matches the queried predicate (underneath the name of the Stream). If I view a stream for `customer-id: BEEMO`, I'm viewing a stream of span data, including latencies, error rate and throughput, matching this particular tag only.
+
+See the Google SRE book ![golden signals](https://landing.google.com/sre/sre-book/chapters/monitoring-distributed-systems/#xref_monitoring_golden-signals) for the philosophy behind the metrics being captured.
+
+###### Latency percentiles
+Four lines representing different latency percentile performance appear on the stream by default. The p99.9 line at any moment, for example, represents the latency performance of 0.1% of transactions during this moment, where as the p50 line will represent the average latency performance. The *filter* button at the top right allows you to add a custom percentile line.
+
+###### Error rate
+The red line represents the historical error rate (error count/ops per second) across time. A stream with no operations occuring will also have a 0% error rate, similarly, a stream with only one operation being captured that is an erroring operation will have a 100% error rate.
+
+###### Throughput
+The black line represents the historical throughput, or raw operation counts per second, across time.
+
+###### Historical Traces
+Each green or red dot represent a saved trace when hovering. Red dots represent error traces. Traces are saved across the full performance distribution every minute, so clicking a trace in the p99 area will give you a p99 trace. Traces with errors are also saved with a higher sampling priority.
+
+Click an individual dot on the stream to view the trace.
+
+*Filter* for error traces via the filter button at the top, or for traces by duration.
+
+<details><summary></summary>
+<p>
+ 
+![click a trace from a stream](https://github.com/sbaum1994/lightstep-guide/blob/master/images/click-trace-from-a-stream.gif)
+
+</p>
+</details>
+
+## Monitor performance over time for a tag
+#### Scenario
+There is a particular tenant that has been having trouble with our iOS Platform. We have an `ios-client` service reporting and a `customer_id` tag reporting as well. 
+
+#### Steps
+1. Query for the service name and customer/tenant tag in Explorer. (or any tag you'd like to create a stream for)
+
+2. Click the "Create Stream" button in the upper right. In this gif, a stream is already created so the button says "View Stream" instead. 
+
+<details><summary></summary>
+<p>
+ 
+![create stream for customer id](https://github.com/sbaum1994/lightstep-guide/blob/master/images/create-stream-for-customer_id.gif)
+
+</p>
+</details>
+
+## Monitor performance across a service using a dashboard
+#### Pre-reqs
+A service is reporting to LightStep with ingress operations.
+
+#### Steps
+1. Query for the reporting service in Service Directory
+2. Click the quick "Create Stream" button on the left for all ingress operations.
+    * See [View ingress and egress operations](#view-ingress-and-egress-operations)
+    * See [Create a stream for an operation](#create-a-stream-for-an-operation)
+3. Create a dashboard.
+
+<details><summary></summary>
+<p>
+ 
+![create dashboard](https://github.com/sbaum1994/lightstep-guide/blob/master/images/create-dashboard.gif)
+
+</p>
+</details>
+
+3. Name the dashboard, star it, and add all created streams.
+
+<details><summary></summary>
+<p>
+ 
+![add streams to dashboard](https://github.com/sbaum1994/lightstep-guide/blob/master/images/name-dashboard-add-operations.gif)
+
+</p>
+</details>
+
+4. Create additional streams as needed view querying in Explorer and add to this dashboard. (such as by `version` tag, or by `tenant-id` or `upstream-service` tags)
+
+## Monitor performance across an end to end transaction using a dashboard
+#### Pre-reqs
+* Multiple services are reporting to LightStep that make up a transaction.
+* You have already gone through the [Explorer](#explorer) walkthrough.
+
+#### Steps
+1. Query for individual operations via Explorer. Start with the highest (most user facing) level ingress operation
+* Click **show all spans in trace** and **group-by** operation to quickly see upstream and downstream operations to this operation.
+* Then click invididual operations to then view individual traces of different downstream operation flows.
+  * Within individual spans on the trace, click the clock next to the operation to quickly query the operation in Explorer
+* Each time you query for a relevant operation Explorer, click the "Create Stream" button on the upper right.
+
+2. Add all streams created to a dashboard named after this transaction.
+
+Example transaction tree for Stream creation (starting from `api-request/charge`)
+
+![example transaction tree](https://github.com/sbaum1994/lightstep-guide/blob/master/images/transaction-tree-for-stream-creation.png)
+
+End Result
+(note that only highest level ingress operations were chosen in this case)
+
+![example transaction dashboard](https://github.com/sbaum1994/lightstep-guide/blob/master/images/charge-transaction-dashboard.png)
+
 ## Define an SLA (Create a condition and an alerting rule for a stream)
+#### Steps
+1. View a Stream
+2. Click the "Create Condition" button on the top right 
+* Supported conditions are on error rate, throughput and latency
+
+![example condition](https://github.com/sbaum1994/lightstep-guide/blob/master/images/example-condition.png)
+
+"Trigger condition when the average (p50) latency is above 1000ms over the last 10m."
+
+3. Add an alerting rule
+* Supported alerting rules include Slack, PagerDuty or a Webhook (for ex. OpsGenie or to an AWS Lambda function)
+
+![example condition and alerting rule](https://github.com/sbaum1994/lightstep-guide/blob/master/images/example-condition-and-alerting-rule.png)
+
+"Alert #acme-alerts slack channel every 2m when the condition is violated."
+
+4. View your conditions
+* You can view conditions for a stream directly by clicking on the "Conditions" button on the top right of the stream page
+* Or you can view conditions on the left by clicking the "Monitoring" tab and selecting "Conditions"
+
+###### Alerts Flow in LightStep
+Alert payloads also include direct links to traces that both violate and don't violate the condition for quicker MTTR. When an alert is triggered, likely the first step should be clicking on these traces and from there jumping into Explorer for real-time exploration. See the [Explorer guides](#logical-flow) for more on using Explorer for debugging. Additionally, it can be helpful to check the service being affected in Service Directory for latency or error rate changes in the last hour.
 
 # Trace page
+## View an individual trace
+![example trace page](https://github.com/sbaum1994/lightstep-guide/blob/master/images/example-trace-page.png)
+
+###### Trace Map
+The trace map of the trace page is the condensed diagram on the top left. The yellow bar represent the **critical path** of Latency Contribution compute by LightStep, to quickly show where the most latency is occuring in a transaction. Different colors represent different services.
+
+###### Spans
+Spans that make up the trace are visualized below the trace map. Spans are emitted from particular services and describe particular operations (`service` and `operation` tags). Click on individual spans to see the **Span Context** update on the right. 
+
+###### Span Context
+Span context is additional information attached to each span in a trace. This includes tags and logs. Tags are unlimited cardinality bits of information that you can use to segment your data in LightStep. Logs are useful logging payloads that are across the duration of the span. These are configured within instrumentation. Under additional details you can also see span start and finish times, as well as the Latency Contribution computed per span.
+
+Workflow links are links generated from a tag dynamically in a trace.
+
 ## Filter for a particular operation
+Click the filter box underneath the trace minimap and type to begin filtering spans across service and operation name.
+
+![filter in trace page](https://github.com/sbaum1994/lightstep-guide/blob/master/images/filter-in-trace-page.png)
+
 ## View a tag, service or operation from a span in Explorer
-## Define an external link for a tag key value pair, operation or service
+Click the individual clock icons on the right corresponding to tags, service and operation to jump directly to Explorer. From here you can view and segment the particular queried data within your recall window.
+
+## Define a workflow link for a tag key value pair, operation or service
+Click the "Create Link" button under Workflow Links on the right to define a Workflow Link. This allows you to create dynamic links to your logging platform, or a slack channel for example, corresponding for a particular service, tag, operation or span timestamp.
+
+See all the rule parameters for creating Workflow Links and more in our ![documentation](https://docs.lightstep.com/docs/workflow-links).
+
+<details><summary></summary>
+<p>
+ 
+![create a workflow link](https://github.com/sbaum1994/lightstep-guide/blob/master/images/create-workflow-link.gif)
+
+</p>
+</details>
+
+Example Workflow:
+1. I get alerted for my `api-server` service on error rate
+2. I click the trace link in the alert payload which takes me to a trace with an `error: true` tagged span selected.
+3. I click the Workflow Link to my logging platform that's generated with the span timestamps, this takes me to the logs for the same time period for this particular service. 
