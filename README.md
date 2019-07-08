@@ -25,7 +25,7 @@ Service directory is LightStep's landing page. It's primary purpose is to allow 
   * __Guides__
     * [Search for a reporting service by platform](#search-for-a-reporting-service-by-platform)
     * [View ingress and egress operations](#view-ingress-and-egress-operations)
-    * [Create a stream for an operation](#create-a-stream-for-an-operation)
+    * [Create streams for ingress operations](#create-a-stream-for-an-operation)
     * [View existing streams and dashboards by service](#view-existing-streams-and-dashboards-by-service)
 ### Explorer
 Explorer is LightStep's query page. This is where you can query your Satellites for live span and trace data, and view traces and performance in real time. You can view a live service diagram with performance overlayed, and do various analyses on your span data. _**There is no cardinality limits or additional cost when querying in Explorer.**_
@@ -48,11 +48,11 @@ Explorer is LightStep's query page. This is where you can query your Satellites 
     * [See frequencies and latency percentiles per status code for an operation](#see-frequencies-and-latency-percentiles-per-status-code-for-an-operation)
     * [View downstream service performance for a single ingress operation of a service](#view-downstream-service-performance-for-a-single-ingress-operation-of-a-service)
 ### Streams
-Streams are where you can record __timeseries data__ in LightStep of your span performance. Any query in Explorer of any cardinality can also be converted to a stream to enable recording of historical data. Streams record latency percentiles, throughput, error rate and traces over time for any query. See the Google SRE book ![golden signals](https://landing.google.com/sre/sre-book/chapters/monitoring-distributed-systems/#xref_monitoring_golden-signals) for the philosophy behind the metrics being captured.
+Streams are where you can record __timeseries data__ in LightStep of your span performance. Any query in Explorer of any cardinality can also be converted to a stream to enable recording of historical data. Streams record latency percentiles, throughput, error rate and traces over time for any query. See the Google SRE book [golden signals](https://landing.google.com/sre/sre-book/chapters/monitoring-distributed-systems/#xref_monitoring_golden-signals) for the philosophy behind the metrics being captured.
   * __Guides__
     * [View an individual stream](#view-an-individual-stream)
     * [Monitor performance over time for a tag](#monitor-performance-over-time-for-a-tag)
-    * [Monitor performance across a service using a dashboard](#monitor-performance-across-a-service-using-dashboard)
+    * [Monitor performance across a service using a dashboard](#monitor-performance-across-a-service-using-a-dashboard)
     * [Monitor performance across an end to end transaction using a dashboard](#monitor-performance-across-an-end-to-end-transaction-using-a-dashboard) (multiple services)
     * [Define an SLA](#define-an-SLA) (Create a condition and an alerting rule for a stream)
 ### Trace page
@@ -61,7 +61,7 @@ View all spans that make up a trace. Clicking spans in LightStep's Explorer page
     * [View an individual trace](#view-an-individual-trace)
     * [Filter for a particular operation](#filter-for-a-particular-operation)
     * [View a tag, service or operation from a span in Explorer](#view-a-tag-service-or-operation-from-a-span-in-explorer)
-    * [Define an external link for a tag key value pair, operation or service](#define-an-external-link-for-a-tag-key-value-pair-operation-or-service)
+    * [Define a workflow link for a tag key value pair, operation or service](#define-a-worflow-link-for-a-tag-key-value-pair-operation-or-service)
 
 # Service Directory
 ## Search for a reporting service by platform
@@ -93,7 +93,7 @@ To filter operations to those that are at the edges of your service, and from th
 * Filter since 1 hour ago, 1 day ago or 1 week ago to see if there have been significant changes in Error Rate, Latency or Throughput for ingress or egress operations
 * Choose an ingress/egress operation and go to Explorer, then view upstream and downstream service level performance for this operation via Service Diagram, or `show all spans in traces` in Trace Analyzer to start investigating upstream and downstream  performance by `operation` (via group-by). [See this guide](#view-downstream-service-performance-for-a-single-ingress-operation-of-a-service)
 
-## Create a stream for ingress operations
+## Create streams for ingress operations
 #### Why?
 Usually ingress operations for a service are high level enough that they will indicate performance problems within a single service, and granular enough that finding the root cause of a performance problem is straightforward. Streams will tell LightStep capture performance data and example traces, making root-cause analysis via individual traces, and tracking performance easier.
 
@@ -116,10 +116,10 @@ If there is a performance problem impacting a particular service (indicated via 
 
 2. Select your service
 
-3a. Select the Streams and Dashboards tabs
+3. Select the Streams and Dashboards tabs
 ![selecting the streams tab](https://github.com/sbaum1994/lightstep-guide/blob/master/images/streams-tab-service-directory.png)
 
-3b. OR view existing streams by operation by clicking View Stream next to an operation.
+4. OR view existing streams by operation by clicking View Stream next to an operation.
 ![selecting view stream from service directory](https://github.com/sbaum1994/lightstep-guide/blob/master/images/filter-by-ingress-and-view-stream-service-directory.png)
 
 # Explorer
@@ -326,7 +326,7 @@ Example Stream:
 ###### What data is a stream capturing?
 A stream in LightStep is capturing all span data flowing from your system into LightStep satellites that matches the queried predicate (underneath the name of the Stream). If I view a stream for `customer-id: BEEMO`, I'm viewing a stream of span data, including latencies, error rate and throughput, matching this particular tag only.
 
-See the Google SRE book ![golden signals](https://landing.google.com/sre/sre-book/chapters/monitoring-distributed-systems/#xref_monitoring_golden-signals) for the philosophy behind the metrics being captured.
+See the Google SRE book [golden signals](https://landing.google.com/sre/sre-book/chapters/monitoring-distributed-systems/#xref_monitoring_golden-signals) for the philosophy behind the metrics being captured.
 
 ###### Latency percentiles
 Four lines representing different latency percentile performance appear on the stream by default. The p99.9 line at any moment, for example, represents the latency performance of 0.1% of transactions during this moment, where as the p50 line will represent the average latency performance. The *filter* button at the top right allows you to add a custom percentile line.
@@ -423,7 +423,7 @@ End Result
 
 ![example transaction dashboard](https://github.com/sbaum1994/lightstep-guide/blob/master/images/charge-transaction-dashboard.png)
 
-## Define an SLA (Create a condition and an alerting rule for a stream)
+## Define an SLA
 #### Steps
 1. View a Stream
 2. Click the "Create Condition" button on the top right 
@@ -467,13 +467,13 @@ Click the filter box underneath the trace minimap and type to begin filtering sp
 
 ![filter in trace page](https://github.com/sbaum1994/lightstep-guide/blob/master/images/filter-in-trace-page.png)
 
-## View a tag, service or operation from a span in Explorer
+## View a tag, service, or operation from a span in Explorer
 Click the individual clock icons on the right corresponding to tags, service and operation to jump directly to Explorer. From here you can view and segment the particular queried data within your recall window.
 
 ## Define a workflow link for a tag key value pair, operation or service
 Click the "Create Link" button under Workflow Links on the right to define a Workflow Link. This allows you to create dynamic links to your logging platform, or a slack channel for example, corresponding for a particular service, tag, operation or span timestamp.
 
-See all the rule parameters for creating Workflow Links and more in our ![documentation](https://docs.lightstep.com/docs/workflow-links).
+See all the rule parameters for creating Workflow Links and more in our [documentation](https://docs.lightstep.com/docs/workflow-links).
 
 <details><summary></summary>
 <p>
