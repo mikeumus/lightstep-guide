@@ -42,10 +42,11 @@ Explorer is LightStep's query page. This is where you can query your Satellites 
     * [Correlations](#correlations)
   * [Logical flow](#logical-flow)
   * __Guides__
-    * [Group by error type to see error frequencies and latency percentiles for a single service](#group-by-error-type-to-see-error-frequencies-and-latency-percentiles-for-a-single-service)
-    * [Filter in latency histogram to get p99's and group by region to root cause a regional problem only affecting a few tenants/requests](#filter-in-latency-histogram-to-get-p99s-and-group-by-region-to-root-cause-a-regional-problem-only-affecting-a-few-tenantsrequests)
-    * [Group by http status code to see frequencies and latency percentiles per status code for an operation](#group-by-http-status-code-to-see-frequencies-and-latency-percentiles-per-status-code-for-an-operation)
-    * [Show all spans in trace and filter in trace analyzer to view upstream service performance for an operation](#show-all-spans-in-trace-and-filter-in-trace-analyzer-to-view-downstream-service-performance-by-ingress-operation)
+    * [Filter in latency histogram use group by to find long running operations
+](#filter-in-latency-histogram-use-group-by-to-find-long-running-operations)
+    * [Root cause a regional problem only affecting a few tenants/requests (p99+)](#root-cause-a-regional-problem-only-affecting-a-few-tenantsrequests-p99)
+    * [See frequencies and latency percentiles per status code for an operation](#see-frequencies-and-latency-percentiles-per-status-code-for-an-operation)
+    * [View downstream service performance for a single ingress operation of a service](#view-downstream-service-performance-for-a-single-ingress-operation-of-a-service)
 ### Streams
 Streams are where you can record __timeseries data__ in LightStep of your span performance. Any query in Explorer of any cardinality can also be converted to a stream to enable recording of historical data. Streams record latency percentiles, throughput, error rate and traces over time for any query.
   * __Guides__
@@ -63,9 +64,62 @@ View all spans that make up a trace. Clicking spans in LightStep's Explorer page
 
 # Service Directory
 ## Search for a reporting service by platform
+#### Why? 
+To find your own service reporting to LightStep, or to see what other services are reporting with the same platform as yours so you can check out their instrumentation. 
+#### Steps
+1. Navigate to the Service Directory tab in LightStep.
+
+2. Filter by platform in the dropdown.
+![filter by platform](https://github.com/sbaum1994/lightstep-guide/blob/master/images/filter-by-platform-service-directory.png)
+
+#### From here
+* Investigate individual traces from reporting services to see what the instrumentation looks like for each.
+* Connect your own service to LightStep via instrumentation.
+
 ## View ingress and egress operations
-## Create a stream for an operation
+#### Why? 
+To filter operations to those that are at the edges of your service, and from there investigate what may be causing performance problems upstream or downstream.
+
+#### Steps
+1. Navigate to the Service Directory tab in LightStep.
+
+2. Select your service
+
+3. Select Ingress or Egress column filters
+![select ingress or egress column filters](https://github.com/sbaum1994/lightstep-guide/blob/master/images/filter-by-ingress-and-view-stream-service-directory.png)
+
+#### From here
+* Filter since 1 hour ago, 1 day ago or 1 week ago to see if there have been significant changes in Error Rate, Latency or Throughput for ingress or egress operations
+* Choose an ingress/egress operation and go to Explorer, then view upstream and downstream service level performance for this operation via Service Diagram, or `show all spans in traces` in Trace Analyzer to start investigating upstream and downstream  performance by `operation` (via group-by). [See this guide](#view-downstream-service-performance-for-a-single-ingress-operation-of-a-service)
+
+## Create a stream for ingress operations
+#### Why?
+Usually ingress operations for a service are high level enough that they will indicate performance problems within a single service, and granular enough that finding the root cause of a performance problem is straightforward. Streams will tell LightStep capture performance data and example traces, making root-cause analysis via individual traces, and tracking performance easier.
+
+#### Steps
+1. Navigate to the Service Directory tab in LightStep.
+
+2. Select your service
+
+3. Select the Ingress column filter
+
+4. Click the "Create Stream" button to the left of the operation. From here you will also be able to easily access streams that have been created.
+![click create stream from service directory](https://github.com/sbaum1994/lightstep-guide/blob/master/images/create-stream-service-directory.png)
+
 ## View existing streams and dashboards by service
+#### Why?
+If there is a performance problem impacting a particular service (indicated via an alert for example) in LightStep, after first investigating in Explorer, you may want to view historical performance by checking whether streams already exist for this service.
+
+#### Steps
+1. Navigate to the Service Directory tab in LightStep.
+
+2. Select your service
+
+3a. Select the Streams and Dashboards tabs
+![selecting the streams tab](https://github.com/sbaum1994/lightstep-guide/blob/master/images/streams-tab-service-directory.png)
+
+3b. OR view existing streams by operation by clicking View Stream next to an operation.
+![selecting view stream from service directory](https://github.com/sbaum1994/lightstep-guide/blob/master/images/filter-by-ingress-and-view-stream-service-directory.png)
 
 # Explorer
 ## Features
@@ -147,8 +201,10 @@ Once you've solved a problem or found relevant clues you could:
 * Create a stream to start collecting performance metrics and historical traces for a query
 
 ## See error frequencies and latency percentiles for a single service
-Scenario: I'd like to investigate the downstream health of all services my `api-server` service depends on.
+#### Scenario
+I'd like to investigate the downstream health of all services my `api-server` service depends on.
 
+#### Steps
 1. First I query the service `api-server` and visit the **service diagram** to view downstream service health.
 
 2. I see that the `auth-service` is red, showing that there are errors reporting dowstream from my `api-server` service.
@@ -203,8 +259,10 @@ Verify that this operation is actually the outlier that is causing long running 
 (! transactions that include user-space-mapping operation) 
 
 ## Root cause a regional problem only affecting a few tenants/requests (p99+)
-Scenario: An alert or complaint comes in for a particular service or transaction experiencing intermittent high latencies. (This could be configured through a stream for this particular service or transaction path by setting the alert condition to `p99 > Xms`) 
+#### Scenario
+An alert or complaint comes in for a particular service or transaction experiencing intermittent high latencies. (This could be configured through a stream for this particular service or transaction path by setting the alert condition to `p99 > Xms`) 
 
+#### Steps
 1. First I query the relevant service, for example `api-server`, and filter the latency histogram to longer running spans.
 
 2. I **group by** the corresponding region tag, in this example `region` in the Trace Analysis table to see which 
@@ -218,6 +276,7 @@ Scenario: An alert or complaint comes in for a particular service or transaction
 </details>
 
 ## See frequencies and latency percentiles per status code for an operation
+#### Steps
 1. I query the relevant service, and (in this example) operation, then **group by** the `http.status_code` tag. I could do this globally or scoped to a particular arbitrary tag (ex. `tenant-id`, or `region`) to view across a section of data.
 
 <details><summary></summary>
@@ -229,6 +288,7 @@ Scenario: An alert or complaint comes in for a particular service or transaction
 </details>
 
 ## View downstream service performance for a single ingress operation of a service
+#### Steps
 1. I query the relevant service (in this case `ios-client`) and view the **service diagram** to see which downstream services have high latency contributions. I notice that `api-server` has significant latency contribution.
 
 <details><summary></summary>
