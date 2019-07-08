@@ -77,7 +77,7 @@ To find your own service reporting to LightStep, or to see what other services a
 * Investigate individual traces from reporting services to see what the instrumentation looks like for each.
 * Connect your own service to LightStep via instrumentation.
 
-## View ingress and egress operations
+## View ingress and egress operations for a service
 #### Why? 
 To filter operations to those that are at the edges of your service, and from there investigate what may be causing performance problems upstream or downstream.
 
@@ -87,7 +87,6 @@ To filter operations to those that are at the edges of your service, and from th
 2. Select your service
 
 3. Select Ingress or Egress column filters
-![select ingress or egress column filters](https://github.com/sbaum1994/lightstep-guide/blob/master/images/filter-by-ingress-and-view-stream-service-directory.png)
 
 #### From here
 * Filter since 1 hour ago, 1 day ago or 1 week ago to see if there have been significant changes in Error Rate, Latency or Throughput for ingress or egress operations
@@ -105,7 +104,14 @@ Usually ingress operations for a service are high level enough that they will in
 3. Select the Ingress column filter
 
 4. Click the "Create Stream" button to the left of the operation. From here you will also be able to easily access streams that have been created.
-![click create stream from service directory](https://github.com/sbaum1994/lightstep-guide/blob/master/images/create-stream-service-directory.png)
+
+<details><summary></summary>
+<p>
+ 
+![click ingress operation and create stream](https://github.com/sbaum1994/lightstep-guide/blob/master/images/click-ingress-operation-and-create-stream.gif)
+
+</p>
+</details>
 
 ## View existing streams and dashboards by service
 #### Why?
@@ -117,10 +123,8 @@ If there is a performance problem impacting a particular service (indicated via 
 2. Select your service
 
 3. Select the Streams and Dashboards tabs
-![selecting the streams tab](https://github.com/sbaum1994/lightstep-guide/blob/master/images/streams-tab-service-directory.png)
 
 4. OR view existing streams by operation by clicking View Stream next to an operation.
-![selecting view stream from service directory](https://github.com/sbaum1994/lightstep-guide/blob/master/images/filter-by-ingress-and-view-stream-service-directory.png)
 
 # Explorer
 ## Features
