@@ -24,8 +24,8 @@ If you do not know what __Satellites__ are, read this [paragraph](https://docs.l
 Service directory is LightStep's landing page. It's primary purpose is to allow you to see reporting services, operations and their high level performance. A reporting service is a service that is sending span data (which make up traces) to LightStep Satellites. You can also quickly see what is instrumented and what is not instrumented in your codebase. 
   * __Guides__
     * [Search for a reporting service by platform](#search-for-a-reporting-service-by-platform)
-    * [View ingress and egress operations](#view-ingress-and-egress-operations)
-    * [Create streams for ingress operations](#create-a-stream-for-an-operation)
+    * [View ingress and egress operations for a service](#view-ingress-and-egress-operations-for-a-service)
+    * [Create streams for ingress operations](#create-streams-for-ingress-operations)
     * [View existing streams and dashboards by service](#view-existing-streams-and-dashboards-by-service)
 ### Explorer
 Explorer is LightStep's query page. This is where you can query your Satellites for live span and trace data, and view traces and performance in real time. You can view a live service diagram with performance overlayed, and do various analyses on your span data. _**There is no cardinality limits or additional cost when querying in Explorer.**_
@@ -71,7 +71,15 @@ To find your own service reporting to LightStep, or to see what other services a
 1. Navigate to the Service Directory tab in LightStep.
 
 2. Filter by platform in the dropdown.
-![filter by platform](https://github.com/sbaum1994/lightstep-guide/blob/master/images/filter-by-platform-service-directory.png)
+
+
+<details><summary></summary>
+<p>
+ 
+![filter by platform](https://github.com/sbaum1994/lightstep-guide/blob/master/images/filter-by-platform-service-directory.gif)
+
+</p>
+</details>
 
 #### From here
 * Investigate individual traces from reporting services to see what the instrumentation looks like for each.
@@ -380,8 +388,7 @@ A service is reporting to LightStep with ingress operations.
 #### Steps
 1. Query for the reporting service in Service Directory
 2. Click the quick "Create Stream" button on the left for all ingress operations.
-    * See [View ingress and egress operations](#view-ingress-and-egress-operations)
-    * See [Create a stream for an operation](#create-a-stream-for-an-operation)
+    * See [View ingress and egress operations](#view-ingress-and-egress-operations-for-a-service)
 3. Create a dashboard.
 
 <details><summary></summary>
