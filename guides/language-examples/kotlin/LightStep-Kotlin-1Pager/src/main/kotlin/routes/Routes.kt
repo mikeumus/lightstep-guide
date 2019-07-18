@@ -10,9 +10,10 @@ data class Move (val description: String ="", val type: String = "")
 val tracer = getTracer("Kotlin Test")
 
 fun getTracer(service: String): JRETracer {
+    val key = KeyService()
     return JRETracer(
         com.lightstep.tracer.shared.Options.OptionsBuilder()
-            .withAccessToken("6how6J0/2q4Dqxo6VYi6CKXwQJARSmcvydZYNIpti97UAsyjiCbH1aKTp3VoealzQouMtY0FA0xuwvDQhYJFU87fXMngEWngSxDKCSsI")
+            .withAccessToken(key.getProjectKey("/key.txt"))
             .withClockSkewCorrection(false)
             .build()
     )
@@ -46,6 +47,13 @@ fun createRoutes(){
         span.setTag("error", true)
         ctx.json("404, route doesn't exist. Try http://localhost:1991/api/v1/moves")
     }.start(1991)
+}
+
+class KeyService{
+
+    fun  getProjectKey(resourcePath:String): String{
+    return object {}.javaClass.getResource("").readText()
+    }
 }
 
 class MoveRequestHandler(tracer: JRETracer) {
@@ -88,3 +96,6 @@ class MoveDAO (tracer: JRETracer)  {
         return moves.getValue(moveName)
     }
 }
+
+
+
