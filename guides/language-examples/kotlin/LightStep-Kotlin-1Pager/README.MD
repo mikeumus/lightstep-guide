@@ -17,6 +17,8 @@ Anyhow..
 ## Set Up
 We are going to instrument a Kotlin REST service built using the Javalin framework. Javalin is lightweight, read up on it here. (https://javalin.io/) I’m a dancer, so my service serves up dance moves.
 
+If you want to see what the api does run dev.sh. It will build everything and run it locally. You will need Docker installed locally.
+
 Here is our starting code:
 ```` kotlin
 package routes
@@ -125,7 +127,7 @@ app.after{ ctx->
 ## Tracing our controllers and DAO
 We need to trace the specific handlers and DAO for this mini service. 
 
-Handler/controller
+## Handler/controller
 ```` kotlin
 class MoveRequestHandler(tracer: JRETracer) {
 

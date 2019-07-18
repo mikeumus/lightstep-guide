@@ -33,7 +33,7 @@ fun createRoutes(){
     app.before { ctx ->
         val span = tracer.buildSpan("api entered").start()
         tracer.scopeManager().activate(span)
-        span.setTag("api","entry")
+        span.setTag("component","javalin.io")
     }
 
     app.after{ ctx->
@@ -41,6 +41,9 @@ fun createRoutes(){
     }
 
     app.error(404) { ctx->
+        val span = tracer.buildSpan("404").start()
+        tracer.scopeManager().activate(span)
+        span.setTag("error", true)
         ctx.json("404, route doesn't exist. Try http://localhost:1991/api/v1/moves")
     }.start(1991)
 }
@@ -50,7 +53,7 @@ class MoveRequestHandler(tracer: JRETracer) {
     private val moveDAO = MoveDAO(tracer)
 
     fun getMoveByName(ctx: Context):Move {
-        val span = tracer.buildSpan("getMoveByNameHANDLER").start()
+        val span = tracer.buildSpan("getMoveByName").start()
         span.setTag("controller","getmovebyname")
 
         tracer.scopeManager().activate(span)
@@ -79,7 +82,7 @@ class MoveDAO (tracer: JRETracer)  {
     )
 
     fun getMoveByName(moveName: String): Move {
-        val span = tracer.buildSpan("getMoveByNameDAO").start()
+        val span = tracer.buildSpan("getMoveByName").start()
         span.setTag("dao","getmovebyname")
         tracer.scopeManager().activate(span)
         return moves.getValue(moveName)

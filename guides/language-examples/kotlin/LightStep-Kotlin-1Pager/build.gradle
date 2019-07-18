@@ -4,7 +4,7 @@ plugins {
 }
 
 application {
-    mainClassName = 'App'
+    mainClassName = 'AppKt'
 }
 
 group 'LS_Kotlin'
