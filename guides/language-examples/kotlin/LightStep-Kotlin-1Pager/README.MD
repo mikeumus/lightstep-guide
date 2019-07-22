@@ -1,5 +1,5 @@
 # Kotlin and LightStep
-###### How to instrument a Kotlin app with LightStep/Opentracing
+###### How to instrument a Kotlin app with LightStep/Opentracing - By Forrest Anthony Knight Jr
 
 
 ## Overview

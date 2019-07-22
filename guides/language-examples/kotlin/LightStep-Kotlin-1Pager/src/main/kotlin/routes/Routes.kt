@@ -13,6 +13,7 @@ fun getTracer(service: String): JRETracer {
     val key = KeyService()
     return JRETracer(
         com.lightstep.tracer.shared.Options.OptionsBuilder()
+            .withComponentName(service)
             .withAccessToken(key.getProjectKey("/key.txt"))
             .withClockSkewCorrection(false)
             .build()
@@ -52,7 +53,7 @@ fun createRoutes(){
 class KeyService{
 
     fun  getProjectKey(resourcePath:String): String{
-    return object {}.javaClass.getResource("").readText()
+    return object {}.javaClass.getResource(resourcePath).readText()
     }
 }
 
