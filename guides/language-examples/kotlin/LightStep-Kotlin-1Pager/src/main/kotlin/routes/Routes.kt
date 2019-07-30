@@ -4,10 +4,12 @@ import com.lightstep.tracer.jre.JRETracer
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder.get
 import io.javalin.http.Context
+import io.opentracing.Tracer
+
 
 data class Move (val description: String ="", val type: String = "")
 
-val tracer = getTracer("Kotlin Test")
+val tracer: Tracer = (getTracer("Kotlin Test"))
 
 fun getTracer(service: String): JRETracer {
     val key = KeyService()
@@ -15,7 +17,6 @@ fun getTracer(service: String): JRETracer {
         com.lightstep.tracer.shared.Options.OptionsBuilder()
             .withComponentName(service)
             .withAccessToken(key.getProjectKey("/key.txt"))
-            .withClockSkewCorrection(false)
             .build()
     )
 }
@@ -57,7 +58,7 @@ class KeyService{
     }
 }
 
-class MoveRequestHandler(tracer: JRETracer) {
+class MoveRequestHandler(tracer: Tracer) {
 
     private val moveDAO = MoveDAO(tracer)
 
@@ -79,7 +80,7 @@ class MoveRequestHandler(tracer: JRETracer) {
 
 }
 
-class MoveDAO (tracer: JRETracer)  {
+class MoveDAO (tracer: Tracer)  {
 
      val moves = hashMapOf(
         "windmill" to Move(

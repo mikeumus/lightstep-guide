@@ -86,22 +86,24 @@ class MoveDAO {
 
 
 ## Dependencies
-Add the LightStep tracer dependencies to your project.
+Add the OpenTracing and  LightStep tracer dependencies to your project.
 
 Just copy these into your gradle file.
 ```` gradle
 compile 'com.lightstep.tracer:lightstep-tracer-jre:0.14.6'
 compile 'com.lightstep.tracer:tracer-okhttp:0.17.2'
 compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
+
+compile 'io.opentracing:opentracing-api:0.33.0'
 ````
 
 ## Create an init function for a global tracer
 Kotlin is interesting in that we can create functions outside of classes and use them loosely. If you know how Kotlin in the JVM works, you know what happens once it compiles, but for now, lets throw this at the top of our file.
 
 ```` kotlin
-val tracer = getTracer("Kotlin Test")
+val tracer:Tracer = getTracer("Kotlin Test")
 
-fun getTracer(service: String): JRETracer {
+fun getTracer(service: String): Tracer {
    return JRETracer(
        com.lightstep.tracer.shared.Options.OptionsBuilder()
            .withAccessToken("YOUR_ACCESS_TOKEN")
@@ -129,7 +131,7 @@ We need to trace the specific handlers and DAO for this mini service.
 
 ## Handler/controller
 ```` kotlin
-class MoveRequestHandler(tracer: JRETracer) {
+class MoveRequestHandler(tracer: Tracer) {
 
    private val moveDAO = MoveDAO(tracer)
 
@@ -154,7 +156,7 @@ class MoveRequestHandler(tracer: JRETracer) {
 
 ## DAO
 ```` kotlin
-class MoveDAO (tracer: JRETracer)  {
+class MoveDAO (tracer: Tracer)  {
 
     val moves = hashMapOf(
        "windmill" to Move(
@@ -184,91 +186,110 @@ Typically we wouldn’t put request controllers and DAO in the same file, but I 
 package routes
 
 ```` kotlin
+package routes
+
 import com.lightstep.tracer.jre.JRETracer
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder.get
 import io.javalin.http.Context
+import io.opentracing.Tracer
+
 
 data class Move (val description: String ="", val type: String = "")
 
-val tracer = getTracer("Kotlin Test")
+val tracer: Tracer = (getTracer("Kotlin Test"))
 
 fun getTracer(service: String): JRETracer {
-   return JRETracer(
-       com.lightstep.tracer.shared.Options.OptionsBuilder()
-           .withAccessToken("YOUR_ACCESS_TOKEN")
-           .withClockSkewCorrection(false)
-           .build()
-   )
+    val key = KeyService()
+    return JRETracer(
+        com.lightstep.tracer.shared.Options.OptionsBuilder()
+            .withComponentName(service)
+            .withAccessToken(key.getProjectKey("/key.txt"))
+            .build()
+    )
 }
 fun createRoutes(){
 
-   val handler = MoveRequestHandler(tracer)
+    val handler = MoveRequestHandler(tracer)
 
-   val app = Javalin.create { config ->
-       config.defaultContentType = "application/json"
-       config.dynamicGzip = true
-       config.contextPath = "/api/v1"
-   }.routes{
-      get("/moves/:move"){ctx: Context -> ctx.json(handler.getMoveByName(ctx))}
-       get("/moves/"){ctx: Context -> ctx.json(handler.getAllMoves())}
-   }
+    val app = Javalin.create { config ->
+        config.defaultContentType = "application/json"
+        config.dynamicGzip = true
+        config.contextPath = "/api/v1"
+    }.routes{
+       get("/moves/:move"){ctx: Context -> ctx.json(handler.getMoveByName(ctx))}
+        get("/moves/"){ctx: Context -> ctx.json(handler.getAllMoves())}
+    }
 
-   app.before { ctx ->
-       val span = tracer.buildSpan("api entered").start()
-       tracer.scopeManager().activate(span)
-       span.setTag("api","entry")
-   }
+    app.before { ctx ->
+        val span = tracer.buildSpan("api entered").start()
+        tracer.scopeManager().activate(span)
+        span.setTag("component","javalin.io")
+    }
 
-   app.after{ ctx->
-       tracer.activeSpan().finish()
-   }
+    app.after{ ctx->
+        tracer.activeSpan().finish()
+    }
 
-   app.error(404) { ctx->
-       ctx.result("YOU DONE GOOFED, 404 MAN!!!")
-   }.start(1991)
+    app.error(404) { ctx->
+        val span = tracer.buildSpan("404").start()
+        tracer.scopeManager().activate(span)
+        span.setTag("error", true)
+        ctx.json("404, route doesn't exist. Try http://localhost:1991/api/v1/moves")
+    }.start(1991)
 }
 
-class MoveRequestHandler(tracer: JRETracer) {
+class KeyService{
 
-   private val moveDAO = MoveDAO(tracer)
+    fun  getProjectKey(resourcePath:String): String{
+    return object {}.javaClass.getResource(resourcePath).readText()
+    }
+}
 
-   fun getMoveByName(ctx: Context):Move {
-       val span = tracer.buildSpan("getMoveByNameHANDLER").start()
-       span.setTag("controller","getmovebyname")
+class MoveRequestHandler(tracer: Tracer) {
 
-       tracer.scopeManager().activate(span)
-       val moveName = ctx.pathParam("move")
-       return moveDAO.getMoveByName(moveName)
-   }
+    private val moveDAO = MoveDAO(tracer)
 
-   fun getAllMoves(): HashMap<String, Move> {
-       val span = tracer.buildSpan("getAllMovesHandler").start()
-       span.setTag("controller","getallmoves")
-       tracer.scopeManager().activate(span)
-       return moveDAO.moves
-   }
+    fun getMoveByName(ctx: Context):Move {
+        val span = tracer.buildSpan("getMoveByName").start()
+        span.setTag("controller","getmovebyname")
+
+        tracer.scopeManager().activate(span)
+        val moveName = ctx.pathParam("move")
+        return moveDAO.getMoveByName(moveName)
+    }
+
+    fun getAllMoves(): HashMap<String, Move> {
+        val span = tracer.buildSpan("getAllMovesHandler").start()
+        span.setTag("controller","getallmoves")
+        tracer.scopeManager().activate(span)
+        return moveDAO.moves
+    }
 
 }
 
-class MoveDAO (tracer: JRETracer)  {
+class MoveDAO (tracer: Tracer)  {
 
-    val moves = hashMapOf(
-       "windmill" to Move(
-           "A classic bboy move where the dancer spins around the crown of their head with their legs out",
-           "Power Move"
-       ),
-       "flare" to Move("A classic power move where the dancer throws both legs out in a circle similar to gymnast circles, but with the legs open", "Air Power"),
-       "toprock" to Move("The Top Rock is all movement where the breaker is still standing. Set's are typically started with top rock.", "Rocking")
-   )
+     val moves = hashMapOf(
+        "windmill" to Move(
+            "A classic bboy move where the dancer spins around the crown of their head with their legs out",
+            "Power Move"
+        ),
+        "flare" to Move("A classic power move where the dancer throws both legs out in a circle similar to gymnast circles, but with the legs open", "Air Power"),
+        "toprock" to Move("The Top Rock is all movement where the breaker is still standing. Set's are typically started with top rock.", "Rocking")
+    )
 
-   fun getMoveByName(moveName: String): Move {
-       val span = tracer.buildSpan("getMoveByNameDAO").start()
-       span.setTag("dao","getmovebyname")
-       tracer.scopeManager().activate(span)
-       return moves.getValue(moveName)
-   }
+    fun getMoveByName(moveName: String): Move {
+        val span = tracer.buildSpan("getMoveByName").start()
+        span.setTag("dao","getmovebyname")
+        tracer.scopeManager().activate(span)
+        return moves.getValue(moveName)
+    }
 }
+
+
+
+
 ````
 
 
