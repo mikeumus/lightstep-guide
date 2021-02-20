@@ -34,8 +34,7 @@ LightStep's C++ library is heavily optimized when using the http streaming trans
 #### iOS Libraries
 LightStep supports two iOS libraries. One is a standard tracer library in Objective C. The other is a Swift library we developed concurrently with Lyft that requires a custom defined transport. This was done to allow for more flexibility and optimization on the analytics data payloads (Lyft was using a specialized transport for all analytics data). [Mobile Envoy](https://eng.lyft.com/announcing-envoy-mobile-5c2067d9ade0) was made to work with this library.
 
-* [Standard LightStep Objective-C Library](https://github.com/lightstep/lightstep-tracer-objc)
-* [Self-defined Transport LightStep Swift Library](https://github.com/lightstep/lightstep-tracer-swift), send a request to your LightStep rep for access to this library as it's non-public
+* [Standard LightStep Objective-C/Swift Library](https://github.com/lightstep/lightstep-tracer-objc)
 
 #### Android Libraries
 LightStep supports two android libraries. One is a standard tracer library with built in Okhttp and GRPC transports. The other is a library we developed concurrently with Lyft that requires a custom defined transport. This was done to allow for more flexibility and optimization on the analytics data payloads (Lyft was using a specialized transport for all analytics data). [Mobile Envoy](https://eng.lyft.com/announcing-envoy-mobile-5c2067d9ade0) was made to work with this library.
